@@ -23,3 +23,11 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('login', () => {
+  cy.visit('https://ipa.ucdavis.edu');
+  cy.contains('Log in').click();
+  cy.get('#username').type(Cypress.env('username'));
+  cy.get('#password').type(Cypress.env('password'));
+  cy.get('#submit').click();
+});
