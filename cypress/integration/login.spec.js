@@ -17,10 +17,12 @@ describe('Summary Page', function() {
     cy.get('#username').type(Cypress.env('username'));
     cy.get('#password').type(Cypress.env('password'));
     cy.get('#submit').click();
+
+    cy.visit('https://ipa.ucdavis.edu/summary');
   });
 
   it('redirects to summary after login', () => {
-    cy.contains('Summary');
+    cy.get('h3').contains('Summary');
     cy.contains(new Date().getFullYear());
   });
 });
