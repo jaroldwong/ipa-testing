@@ -17,8 +17,6 @@ describe('Summary Page', function() {
     cy.get('#username').type(Cypress.env('username'));
     cy.get('#password').type(Cypress.env('password'));
     cy.get('#submit').click();
-
-    cy.visit('https://ipa.ucdavis.edu/summary');
   });
 
   it('redirects to summary after login', () => {
