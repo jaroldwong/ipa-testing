@@ -1,6 +1,6 @@
 describe('instructors page', () => {
   before(() => {
-    cy.login();
+    cy.loginAndVisit();
   });
 
   it('navigates to the Assign Instructors page', () => {
@@ -18,6 +18,10 @@ describe('instructors page', () => {
       .parents('div.course-list-row')
       .within($row => {
         cy.get('.dropdown').click();
+        cy.contains('Jarold Wong').click();
+        cy.get('div.alert').contains('Jarold Wong');
       });
+
+    // cy.get('.toast').contains('Assigned Instructor');
   });
 });

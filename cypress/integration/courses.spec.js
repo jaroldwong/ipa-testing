@@ -1,6 +1,6 @@
 describe('courses page', () => {
   before(() => {
-    cy.login();
+    cy.loginAndVisit();
   });
 
   it('navigates to Courses page from Summary', () => {
