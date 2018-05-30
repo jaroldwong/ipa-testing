@@ -12,16 +12,31 @@ describe('instructors page', () => {
     cy.contains('Assignments');
   });
 
-  it('assign instructor to ECS10', () => {
+  it('assigns instructor to ECS10', () => {
     cy
       .contains('ECS 010')
       .parents('div.course-list-row')
+      .as('row')
       .within($row => {
         cy.get('.dropdown').click();
         cy.contains('Jarold Wong').click();
-        cy.get('div.alert').contains('Jarold Wong');
       });
 
-    // cy.get('.toast').contains('Assigned Instructor');
+    cy.get('@row').contains('Jarold Wong');
+
+    // cy.get('.toast').contains('Assigned instructor to course');
+  });
+
+  it('removes assigned instructor from ECS10', () => {
+    cy
+      .contains('ECS 010')
+      .parents('div.course-list-row')
+      .contains('Jarold Wong')
+      .find('.assignment-remove')
+      .click();
+
+    cy.get('[data-event-type=deleteAssignment]').click();
+
+    // cy.get('.toast').contains('Removed instructor from course');
   });
 });
