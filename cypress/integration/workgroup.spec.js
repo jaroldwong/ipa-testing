@@ -48,14 +48,19 @@ describe('workgroup page', () => {
       });
   });
 
-  it('shows instructor type as Pre-Six after switching tabs', () => {
-    cy.get('.ipa-tabs__header').within($header => {
-      cy.contains('Staff').click();
-    });
+  it('shows instructor type as Pre-Six after reload', () => {
+    cy.reload();
+    cy.loginAndVisit('workgroups');
 
-    cy.get('.ipa-tabs__header').within($header => {
-      cy.contains('Instructor').click();
-    });
+    cy
+      .get('.ipa-tabs__tab')
+      .contains('Staff')
+      .click();
+
+    cy
+      .get('.ipa-tabs__tab')
+      .contains('Instructor')
+      .click();
 
     cy
       .contains('Wong, Jarold')
