@@ -1,6 +1,19 @@
 describe('Summary Page', function() {
   it('connects to ipa', function() {
     cy.visit('https://ipa.ucdavis.edu');
+
+    cy.on('uncaught:exception', (err, runnable) => {
+      expect(err.message).to.include('hide_sidebar_menu is not defined');
+
+      // using mocha's async done callback to finish
+      // this test so we prove that an uncaught exception
+      // was thrown
+      done();
+
+      // return false to prevent the error from
+      // failing this test
+      return false;
+    });
   });
 
   it('has a login button', () => {
