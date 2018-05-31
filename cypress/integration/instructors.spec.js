@@ -31,8 +31,12 @@ describe('instructors page', () => {
     cy
       .contains('ECS 010')
       .parents('div.course-list-row')
+      .as('row');
+
+    cy
+      .get('@row')
       .contains('Jarold Wong')
-      .find('.assignment-remove')
+      .find('[data-event-type=deleteAssignmentPop]')
       .click();
 
     cy.get('[data-event-type=deleteAssignment]').click();
