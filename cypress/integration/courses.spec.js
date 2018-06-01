@@ -18,8 +18,11 @@ describe('courses page', () => {
     cy.get('[data-event-type=selectAllCourseRows].checkbox-container').click();
     cy.get('span.tool-icon.glyphicon.glyphicon-trash').click();
     cy.get('.delete-course-modal-footer').within($modal => {
+      cy.server();
+      cy.route('PUT', '**/courseView/**').as('deleteCourses');
       cy.get('button.btn-danger').click();
     });
+    cy.wait('@deleteCourses');
   });
 
   it('adds ECS courses from 2015-16', () => {
