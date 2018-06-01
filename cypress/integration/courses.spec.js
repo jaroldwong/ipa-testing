@@ -64,7 +64,7 @@ describe('courses page', () => {
     cy.route('POST', '**/courseView/**').as('postCourses');
 
     cy.contains('Import courses').click();
-    cy.wait('@postCourses');
+    cy.wait('@postCourses', { timeout: 60000 });
 
     // div.toast-title
     cy.get('.toast-title').contains('Created');
