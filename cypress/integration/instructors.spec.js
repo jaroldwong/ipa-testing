@@ -19,10 +19,17 @@ describe('instructors page', () => {
       .as('row')
       .within($row => {
         cy.get('.dropdown').click();
+
+        cy.server();
+        cy.route('POST', '**/assignmentView/**').as('postInstructor');
+
         cy.contains('Jarold Wong').click();
       });
 
-    cy.get('@row').contains('Jarold Wong');
+    cy
+      .wait('@postInstructor')
+      .get('@row')
+      .contains('Jarold Wong');
 
     // cy.get('.toast').contains('Assigned instructor to course');
   });
