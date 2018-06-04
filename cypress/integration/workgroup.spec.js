@@ -3,6 +3,14 @@ describe('workgroup page', () => {
     cy.loginAndVisit();
   });
 
+  beforeEach(() => {
+    cy.restoreLocalStorage();
+  });
+
+  afterEach(() => {
+    cy.saveLocalStorage();
+  });
+
   after(() => {
     // reset to generic instructor
     cy
@@ -50,7 +58,7 @@ describe('workgroup page', () => {
 
   it('shows instructor type as Pre-Six after reload', () => {
     cy.reload();
-    cy.loginAndVisit('workgroups');
+    // cy.loginAndVisit('workgroups');
 
     cy
       .get('.ipa-tabs__tab')
