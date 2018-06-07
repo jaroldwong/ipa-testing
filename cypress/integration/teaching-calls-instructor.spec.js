@@ -179,7 +179,143 @@ describe('instructor can respond to a teaching call', () => {
     cy.get('textarea').should('have.value', 'This is a comment');
   });
 
-  it('should be able to leave different preferences on different terms', () => {});
+  it('should be able to leave different preferences on different terms', () => {
+    cy.visit('/teachingCalls/20/2019/teachingCall');
+
+    cy.get('.teaching-call--academic-term-sidebar')
+      .contains('Winter Quarter')
+      .click();
+
+    cy.get('.search-course-container').click();
+    cy.contains('ECS 122A Algorithm Design').click();
+
+    cy.get('.preference-cell.outline > div').should(
+      'contain',
+      'ECS 122A Algorithm Design'
+    );
+
+    cy.get('.left')
+      .contains('10')
+      .parent('tr')
+      .within($row => {
+        cy.get('td').click({ multiple: true });
+      });
+
+    cy.get('.left')
+      .contains('11')
+      .parent('tr')
+      .within($row => {
+        cy.get('td').click({ multiple: true });
+      });
+
+    cy.get('.left')
+      .contains('10')
+      .parent('tr')
+      .within($row => {
+        cy.get('td')
+          .filter('.unavailable')
+          .should('have.length', '5');
+      });
+
+    cy.get('.left')
+      .contains('11')
+      .parent('tr')
+      .within($row => {
+        cy.get('td')
+          .filter('.unavailable')
+          .should('have.length', '5');
+      });
+
+    cy.get('.teaching-call--academic-term-sidebar')
+      .contains('Spring Quarter')
+      .click();
+
+    cy.get('.search-course-container').click();
+    cy.contains('ECS 122B Algorithm Design').click();
+
+    cy.get('.preference-cell.outline > div').should(
+      'contain',
+      'ECS 122B Algorithm Design'
+    );
+
+    cy.get('.left')
+      .contains('3')
+      .parent('tr')
+      .within($row => {
+        cy.get('td').click({ multiple: true });
+      });
+
+    cy.get('.left')
+      .contains('4')
+      .parent('tr')
+      .within($row => {
+        cy.get('td').click({ multiple: true });
+      });
+
+    cy.get('.left')
+      .contains('3')
+      .parent('tr')
+      .within($row => {
+        cy.get('td')
+          .filter('.unavailable')
+          .should('have.length', '5');
+      });
+
+    cy.get('.left')
+      .contains('4')
+      .parent('tr')
+      .within($row => {
+        cy.get('td')
+          .filter('.unavailable')
+          .should('have.length', '5');
+      });
+
+    // Wait for update to finish and then tear down
+    cy.server();
+    cy.route('PUT', '**/api/assignmentView/**').as('putUnavailabilities');
+    cy.wait('@putUnavailabilities');
+    cy.wait('@putUnavailabilities');
+
+    cy.get('.toast-success').then(() => {
+      const token = localStorage.getItem('JWT');
+      // Winter
+      cy.request({
+        method: 'PUT',
+        url:
+          'https://api.ipa.ucdavis.edu/api/assignmentView/teachingCallResponses/5729',
+        auth: {
+          bearer: token
+        },
+        body: {
+          id: 5729,
+          availabilityBlob:
+            '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1',
+          termCode: '202001',
+          instructorId: 2515,
+          scheduleId: 232
+        }
+      });
+
+      // Spring
+      cy.request({
+        method: 'PUT',
+        url:
+          'https://api.ipa.ucdavis.edu/api/assignmentView/teachingCallResponses/5731',
+        auth: {
+          bearer: token
+        },
+        body: {
+          id: 5731,
+          availabilityBlob:
+            '1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1',
+          termCode: '202003',
+          instructorId: 2515,
+          scheduleId: 232
+        }
+      });
+    });
+  });
+
   it('should be able to submit preferences', () => {});
 
   it('should be able to reload the page and see all information saved', () => {
