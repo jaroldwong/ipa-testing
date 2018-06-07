@@ -11,6 +11,7 @@ describe('instructor can respond to a teaching call', () => {
     cy.saveLocalStorage();
   });
 
+  // TODO: decouple tests
   it('shows active teaching calls', () => {
     cy.contains('Teaching Call for Review');
   });
@@ -52,7 +53,7 @@ describe('instructor can respond to a teaching call', () => {
     );
   });
 
-  it.only('should be able to re-order a preference', () => {
+  it('should be able to re-order a preference', () => {
     cy.visit('/teachingCalls/20/2019/teachingCall');
 
     // TODO: use routes instead of UI to build up state
@@ -136,7 +137,42 @@ describe('instructor can respond to a teaching call', () => {
     cy.get('.confirmbutton-yes').click();
     cy.wait('@deletePref');
   });
-  it('should be able to indicated unavailabilities', () => {});
+
+  it('should be able to indicate unavailabilities', () => {
+    cy.visit('/teachingCalls/20/2019/teachingCall');
+
+    cy.get('.left')
+      .contains('7')
+      .parent('tr')
+      .within($row => {
+        cy.get('td').click({ multiple: true });
+      });
+
+    cy.get('.left')
+      .contains('8')
+      .parent('tr')
+      .within($row => {
+        cy.get('td').click({ multiple: true });
+      });
+
+    cy.get('.left')
+      .contains('7')
+      .parent('tr')
+      .within($row => {
+        cy.get('td')
+          .filter('.unavailable')
+          .should('have.length', '5');
+      });
+
+    cy.get('.left')
+      .contains('8')
+      .parent('tr')
+      .within($row => {
+        cy.get('td')
+          .filter('.unavailable')
+          .should('have.length', '5');
+      });
+  });
 
   it('should be able to leave a comment', () => {
     cy.get('textarea').type('{selectall}This is a comment');
