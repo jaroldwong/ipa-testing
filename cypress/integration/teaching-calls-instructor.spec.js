@@ -1,6 +1,21 @@
 describe('instructor can respond to a teaching call', () => {
   before(() => {
     cy.loginAndVisit('summary/20/2019?mode=instructor');
+
+    cy.get('.teaching-calls').then($TC => {
+      // check for 'View Teaching Call Form' button
+      if ($TC.find('.teaching-calls-table__button').length) {
+        return;
+      } else {
+        // create Teaching Call if not found
+        cy.loginAndVisit('teachingCalls/20/2019/teachingCallStatus');
+        cy.get('.teaching-call-status__submission-container > .btn').click();
+        cy.contains('Wong, Jarold').click();
+        cy.get('.add-instructors-modal__footer')
+          .find('.btn')
+          .click();
+      }
+    });
   });
 
   // beforeEach(() => {
@@ -12,7 +27,6 @@ describe('instructor can respond to a teaching call', () => {
   // });
 
   // TODO: decouple tests
-  // need to create a new teaching call first
   it('shows active teaching calls', () => {
     cy.contains('Teaching Call for Review');
   });
