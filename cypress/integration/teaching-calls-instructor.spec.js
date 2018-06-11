@@ -3,15 +3,16 @@ describe('instructor can respond to a teaching call', () => {
     cy.loginAndVisit('summary/20/2019?mode=instructor');
   });
 
-  beforeEach(() => {
-    cy.restoreLocalStorage();
-  });
+  // beforeEach(() => {
+  //   cy.restoreLocalStorage();
+  // });
 
-  afterEach(() => {
-    cy.saveLocalStorage();
-  });
+  // afterEach(() => {
+  //   cy.saveLocalStorage();
+  // });
 
   // TODO: decouple tests
+  // need to create a new teaching call first
   it('shows active teaching calls', () => {
     cy.contains('Teaching Call for Review');
   });
@@ -118,7 +119,7 @@ describe('instructor can respond to a teaching call', () => {
     cy.get('.remove-preference-btn')
       .first()
       .click();
-    cy.get('.confirmbutton-yes').click();
+    cy.get('.confirmbutton-yes').click({ force: true });
     cy.wait('@deletePref');
 
     cy.server();
@@ -126,7 +127,7 @@ describe('instructor can respond to a teaching call', () => {
     cy.get('.remove-preference-btn')
       .first()
       .click();
-    cy.get('.confirmbutton-yes').click();
+    cy.get('.confirmbutton-yes').click({ force: true });
     cy.wait('@deletePref');
 
     cy.server();
@@ -134,7 +135,7 @@ describe('instructor can respond to a teaching call', () => {
     cy.get('.remove-preference-btn')
       .first()
       .click();
-    cy.get('.confirmbutton-yes').click();
+    cy.get('.confirmbutton-yes').click({ force: true });
     cy.wait('@deletePref');
   });
 
@@ -272,19 +273,19 @@ describe('instructor can respond to a teaching call', () => {
 
     // Wait for update to finish and then tear down
     cy.server();
-    cy.route('PUT', '**/api/assignmentView/**').as('putUnavailabilities');
-    cy.wait('@putUnavailabilities');
-    cy.wait('@putUnavailabilities');
+    cy.route('PUT', '**/api/assignmentView/**').as('putGrid');
+    cy.wait('@putGrid');
+    cy.wait('@putGrid');
 
+    // FIXME: Don't hardcode id...
     cy.get('.toast-success').then(() => {
-      const token = localStorage.getItem('JWT');
       // Winter
       cy.request({
         method: 'PUT',
         url:
           'https://api.ipa.ucdavis.edu/api/assignmentView/teachingCallResponses/5729',
         auth: {
-          bearer: token
+          bearer: localStorage.getItem('JWT')
         },
         body: {
           id: 5729,
@@ -302,7 +303,7 @@ describe('instructor can respond to a teaching call', () => {
         url:
           'https://api.ipa.ucdavis.edu/api/assignmentView/teachingCallResponses/5731',
         auth: {
-          bearer: token
+          bearer: localStorage.getItem('JWT')
         },
         body: {
           id: 5731,
@@ -316,19 +317,59 @@ describe('instructor can respond to a teaching call', () => {
     });
   });
 
-  it('should be able to submit preferences', () => {});
-
-  it('should be able to reload the page and see all information saved', () => {
+  it.only('should be able to reload the page and see all information saved', () => {
     cy.visit('/teachingCalls/20/2019/teachingCall');
-    cy.get('.table.availability-grid').then($grid => {
-      const grid = $grid;
-      cy.reload().then(() => {
-        cy.get('.table.availability-grid').should($grid => {
-          expect(grid.is('.table.availability-grid')).to.be.true;
-        });
-      });
-    });
+
+    cy.get('.search-course-container').click();
+    cy.contains('ECS 010 Intro to Programming').click();
+
+    cy.get('.teaching-call--academic-term-sidebar')
+      .contains('Winter Quarter')
+      .click();
+
+    cy.get('.search-course-container').click();
+    cy.contains('ECS 015 Intro to Computers').click();
+
+    cy.get('.teaching-call--academic-term-sidebar')
+      .contains('Spring Quarter')
+      .click();
+
+    cy.get('.search-course-container').click();
+    cy.contains('ECS 120 Theory Computation').click();
+
+    cy.reload();
+
+    cy.get('.preference-cell.outline > div').should(
+      'contain',
+      'ECS 010 Intro to Programming'
+    );
+
+    cy.get('.teaching-call--academic-term-sidebar')
+      .contains('Winter Quarter')
+      .click();
+
+    cy.get('.preference-cell.outline > div').should(
+      'contain',
+      'ECS 015 Intro to Computers'
+    );
+
+    cy.get('.teaching-call--academic-term-sidebar')
+      .contains('Spring Quarter')
+      .click();
+
+    cy.get('.preference-cell.outline > div').should(
+      'contain',
+      'ECS 120 Theory Computation'
+    );
   });
 
-  it('should be able to see on the instructor summary screen that they have responded to a teaching call', () => {});
+  it('should be able to submit preferences', () => {
+    cy.contains('Submit').click();
+    cy.get('.confirmbutton-yes').click();
+  });
+
+  it('should be able to see on the instructor summary screen that they have responded to a teaching call', () => {
+    cy.contains('Teaching preferences have been submitted');
+    cy.get('.glyphicon-ok');
+  });
 });
