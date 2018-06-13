@@ -2,29 +2,30 @@ describe('instructor can respond to a teaching call', () => {
   before(() => {
     cy.loginAndVisit('summary/20/2019?mode=instructor');
 
+    const createTC = () => {
+      cy.visit('teachingCalls/20/2019/teachingCallStatus');
+      cy.get('.teaching-call-status__submission-container > .btn').click();
+      cy.contains('Wong, Jarold').click();
+      cy.get('.add-instructors-modal__footer')
+        .find('.btn')
+        .click();
+    }
+
     cy.get('.teaching-calls').then($TC => {
-      // check for 'View Teaching Call Form' button
       // check if TC already submitted
       if ($TC.find('.glyphicon-ok').length) {
-        // delete Submitted teaching call and create
+        // delete Submitted teaching call
+        cy.log('inside submit case')
         cy.visit('teachingCalls/20/2019/teachingCallStatus');
         cy.get('.remove-instructor-ui')
           .trigger('mouseover', { force: true })
           .click({ force: true });
         cy.get('.confirmbutton-yes').click();
-        cy.get('.teaching-call-status__submission-container > .btn').click();
-        cy.contains('Wong, Jarold').click();
-        cy.get('.add-instructors-modal__footer')
-          .find('.btn')
-          .click();
-      } else {
-        // create Teaching Call if not found
-        cy.loginAndVisit('teachingCalls/20/2019/teachingCallStatus');
-        cy.get('.teaching-call-status__submission-container > .btn').click();
-        cy.contains('Wong, Jarold').click();
-        cy.get('.add-instructors-modal__footer')
-          .find('.btn')
-          .click();
+        // create new teaching call
+        createTC();
+      } else if (!$TC.find('.teaching-calls-table__button').length) {
+        // if no "View Teaching Call Form Button"
+        createTC();
       }
     });
   });
@@ -42,7 +43,7 @@ describe('instructor can respond to a teaching call', () => {
     cy.contains('Teaching Call for Review');
   });
 
-  it.only('loads active teaching call form', () => {
+  it('loads active teaching call form', () => {
     cy.visit('summary/20/2019?mode=instructor');
     cy.get('.teaching-calls-table__button').click();
     cy.location().should(loc => {
@@ -60,6 +61,7 @@ describe('instructor can respond to a teaching call', () => {
     cy.get('@list').should('have.length', 3);
   });
 
+  // TODO: Combine Add and Remove into one test?
   it('should be able to add a preference', () => {
     cy.visit('teachingCalls/20/2019/teachingCall');
     cy.get('.search-course-container').click();
@@ -84,32 +86,39 @@ describe('instructor can respond to a teaching call', () => {
     );
   });
 
-  it('should be able to re-order a preference', () => {
+  it.only('should be able to re-order a preference', () => {
     cy.visit('/teachingCalls/20/2019/teachingCall');
 
     // TODO: use routes instead of UI to build up state
 
     // Add three courses
+    // grab course ID
+    cy.server();
+    cy.route('POST', '**/assignmentView/preferences/*').as('putCourses');
     cy.get('.search-course-container').click();
     cy.contains('ECS 010 Intro to Programming').click();
-    // cy.get('.preference-cell.outline > div').should(
-    //   'contain',
-    //   'ECS 010 Intro to Programming'
-    // );
+    cy.wait('@putCourses').then($xhr => {
+      cy.log($xhr.request.body);
+    })
+
+    cy.get('.preference-cell.outline > div').should(
+      'contain',
+      'ECS 010 Intro to Programming'
+    );
 
     cy.get('.search-course-container').click();
     cy.contains('ECS 020 Discrete Math for CS').click();
-    // cy.get('.preference-cell.outline > div').should(
-    //   'contain',
-    //   'ECS 020 Discrete Math for CS'
-    // );
+    cy.get('.preference-cell.outline > div').should(
+      'contain',
+      'ECS 020 Discrete Math for CS'
+    );
 
     cy.get('.search-course-container').click();
     cy.contains('ECS 030 Programming&Prob Solving').click();
-    // cy.get('.preference-cell.outline > div').should(
-    //   'contain',
-    //   'ECS 030 Programming&Prob Solving'
-    // );
+    cy.get('.preference-cell.outline > div').should(
+      'contain',
+      'ECS 030 Programming&Prob Solving'
+    );
 
     // Find ECS30 and click up twice
     cy.contains('ECS 030')
@@ -143,29 +152,26 @@ describe('instructor can respond to a teaching call', () => {
     );
 
     // remove courses after
+    // each course pref has it's own id
     cy.server();
     cy.route('DELETE', '**/preferences/**').as('deletePref');
+    cy.get('.remove-preference-btn')
+      .first()
+      .click();
+    cy.get('.confirmbutton-yes').click({ force: true });
+    cy.wait('@deletePref');
+    cy.log('@deletePref')
+
     cy.get('.remove-preference-btn')
       .first()
       .click();
     cy.get('.confirmbutton-yes').click({ force: true });
     cy.wait('@deletePref');
 
-    cy.server();
-    cy.route('DELETE', '**/preferences/**').as('deletePref');
     cy.get('.remove-preference-btn')
       .first()
       .click();
     cy.get('.confirmbutton-yes').click({ force: true });
-    cy.wait('@deletePref');
-
-    cy.server();
-    cy.route('DELETE', '**/preferences/**').as('deletePref');
-    cy.get('.remove-preference-btn')
-      .first()
-      .click();
-    cy.get('.confirmbutton-yes').click({ force: true });
-    cy.wait('@deletePref');
   });
 
   it('should be able to indicate unavailabilities', () => {
@@ -395,19 +401,11 @@ describe('instructor can respond to a teaching call', () => {
   it('should be able to submit preferences', () => {
     cy.contains('Submit').click();
     cy.get('.confirmbutton-yes').click();
-    // cy.get('.teaching-call--progress-sidebar').then($sidebar => {
-    //   if ($sidebar.find('.disabled')) {
-    //     return;
-    //   } else {
-    //     cy.contains('Submit').click();
-    //     cy.get('.confirmbutton-yes').click();
-    //   }
-    // });
   });
 
   it('should be able to see on the instructor summary screen that they have responded to a teaching call', () => {
-    // cy.visit('summary/20/2019?mode=instructor');
-    cy.contains('Teaching preferences have been submitted');
+    cy.visit('summary/20/2019?mode=instructor');
+    // cy.contains('Teaching preferences have been submitted');
     cy.get('.glyphicon-ok');
   });
 });
